@@ -85,7 +85,7 @@ func (h *Handler) Send(tables []models.DataTable) error {
 					tx.Rollback()
 					return fmt.Errorf("period_id %d no encontrado para reading", reading.Period_id)
 				}
-
+				fmt.Printf("E: %v", reading)
 				if err := h.postgres.InsertReading(reading); err != nil {
 					tx.Rollback()
 					return fmt.Errorf("error insertando reading: %w", err)

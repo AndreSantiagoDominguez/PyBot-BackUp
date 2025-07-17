@@ -23,7 +23,7 @@ func NewPostgreSQL() *PostgreSQL {
 
 func (postgre *PostgreSQL) InsertPeriod( wp models.WorkPeriod) (int, error) {
 	query := `INSERT INTO work_periods (period_id, start_hour, end_hour, day_work, prototype_id, backup)
-	      values ($1,$2,$3,$4,$5, $6)
+	      VALUES ($1,$2,$3,$4,$5, $6)
 		  RETURNING period_id`
 
 	const layout = "2006-01-02T15:04:05.999999Z07:00"
@@ -53,7 +53,7 @@ func (postgre *PostgreSQL) InsertPeriod( wp models.WorkPeriod) (int, error) {
 }
 
 func (postgre *PostgreSQL) InsertReading(r models.Reading)(error){
-	query := `INSERT INTO readings (period_id, distance_traveled, weight_waste)}
+	query := `INSERT INTO readings (period_id, distance_traveled, weight_waste)
 			  VALUES ($1, $2, $3)
 			  RETURNING period_id`
 
@@ -71,12 +71,12 @@ func (postgre *PostgreSQL) InsertReading(r models.Reading)(error){
 
 func (postgres *PostgreSQL)	InsertWasteCollectionRegister(wc models.WasteCollection) (int, error) {
 	query := `INSERT INTO waste_collection (waste_collection_id, period_id, amount, waste_id)
-			  VALUES ($1, $2, DEFAULT, $3)
+			  VALUES ($1, $2, $3, $4)
 			  RETURNING waste_collection_id`
 
 	var id int		  
 	
-	err := postgres.conn.DB.QueryRow(query,wc.Waste_collection_id , wc.Period_id, wc.Waste_id).Scan(&id)
+	err := postgres.conn.DB.QueryRow(query,wc.Waste_collection_id , wc.Period_id, wc.Amount, wc.Waste_id).Scan(&id)
 	if err != nil {
 		fmt.Printf("Error al ejecutar WasteCollectionRegister: %v", err)
 		return 0, err
