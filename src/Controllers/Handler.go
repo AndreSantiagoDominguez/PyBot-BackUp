@@ -20,22 +20,6 @@ func NewHandler() *Handler {
 
 // Send inserta en la base de datos todos los registros recibidos
 func (h *Handler) Send(tables []models.DataTable) (err error) {
-	tx, err := h.postgres.conn.DB.Begin()
-	if err != nil {
-		return fmt.Errorf("error al iniciar transacción: %w", err)
-	}
-	defer func() {
-		if p := recover(); p != nil {
-			tx.Rollback()
-			log.Printf("Transacción revertida por panic: %v", p)
-			panic(p)
-		} else if err != nil {
-			tx.Rollback()
-		} else {
-			err = tx.Commit()
-		}
-	}()
-
 	for _, table := range tables {
 		if table.Data == nil {
 			continue
