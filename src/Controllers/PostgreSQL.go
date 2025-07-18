@@ -22,6 +22,7 @@ func NewPostgreSQL() *PostgreSQL {
 }
 
 func (postgre *PostgreSQL) InsertPeriod( wp models.WorkPeriod) (int, error) {
+	fmt.Printf("D: %v", wp)
 	query := `INSERT INTO work_periods (period_id, start_hour, end_hour, day_work, prototype_id, backup)
 	      VALUES ($1,$2,$3,$4,$5, $6)
 		  RETURNING period_id`
