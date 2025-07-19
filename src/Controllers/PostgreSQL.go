@@ -53,14 +53,15 @@ func (postgre *PostgreSQL) InsertPeriod( wp models.WorkPeriod) (int, error) {
 	return id, nil
 }
 
-func (postgre *PostgreSQL) InsertReading(r models.Reading)(error){
-	query := `INSERT INTO readings (period_id, distance_traveled, weight_waste)
-			  VALUES ($1, $2, $3)
+func (postgre *PostgreSQL) InsertReading(r models.Reading, prototype_id string)(error){
+	fmt.Printf("E: %v", prototype_id)
+	query := `INSERT INTO readings (period_id, distance_traveled, weight_waste, prototype_id)
+			  VALUES ($1, $2, $3, $4)
 			  RETURNING period_id`
 
 	var id int 
 	
-	err := postgre.conn.DB.QueryRow(query,r.Period_id, r.Distance_traveled, r.Weight_waste).Scan(&id)
+	err := postgre.conn.DB.QueryRow(query,r.Period_id, r.Distance_traveled, r.Weight_waste, prototype_id).Scan(&id)
 	if err != nil {
 		fmt.Printf("Error al ejecutar la insercion de reading: %v", err)
 		return err
@@ -70,14 +71,14 @@ func (postgre *PostgreSQL) InsertReading(r models.Reading)(error){
 		
 }
 
-func (postgres *PostgreSQL)	InsertWasteCollectionRegister(wc models.WasteCollection) (int, error) {
-	query := `INSERT INTO waste_collection (waste_collection_id, period_id, amount, waste_id)
-			  VALUES ($1, $2, $3, $4)
+func (postgres *PostgreSQL)	InsertWasteCollectionRegister(wc models.WasteCollection, prototype_id string) (int, error) {
+	query := `INSERT INTO waste_collection (waste_collection_id, period_id, amount, waste_id, prototype_id)
+			  VALUES ($1, $2, $3, $4, $5)
 			  RETURNING waste_collection_id`
 
 	var id int		  
 	
-	err := postgres.conn.DB.QueryRow(query,wc.Waste_collection_id , wc.Period_id, wc.Amount, wc.Waste_id).Scan(&id)
+	err := postgres.conn.DB.QueryRow(query,wc.Waste_collection_id , wc.Period_id, wc.Amount, wc.Waste_id, prototype_id).Scan(&id)
 	if err != nil {
 		fmt.Printf("Error al ejecutar WasteCollectionRegister: %v", err)
 		return 0, err
@@ -86,9 +87,9 @@ func (postgres *PostgreSQL)	InsertWasteCollectionRegister(wc models.WasteCollect
 	return id, nil
 }
 
-func (postgres *PostgreSQL)	InsertWeightData(w models.WeightData) (int, error) {
-	query := `INSERT INTO weight_data (weight_data_id, period_id, hour_period, weight)
-			  VALUES ($1, $2, $3, $4)
+func (postgres *PostgreSQL)	InsertWeightData(w models.WeightData, prototype_id string) (int, error) {
+	query := `INSERT INTO weight_data (weight_data_id, period_id, hour_period, weight, prototype_id)
+			  VALUES ($1, $2, $3, $4, $5)
 			  RETURNING weight_data_id` 
 
 	var id int
@@ -100,7 +101,7 @@ func (postgres *PostgreSQL)	InsertWeightData(w models.WeightData) (int, error) {
 		return 0, err
 	}
 
-	err = postgres.conn.DB.QueryRow(query, w.Weight_data_id, w.Period_id, startT, w.Weight).Scan(&id)
+	err = postgres.conn.DB.QueryRow(query, w.Weight_data_id, w.Period_id, startT, w.Weight, prototype_id).Scan(&id)
 	if err != nil {
 		fmt.Printf("Error al ejecutarr la consulta WeightRegister: %v", err)
 		return 0, err
@@ -109,9 +110,9 @@ func (postgres *PostgreSQL)	InsertWeightData(w models.WeightData) (int, error) {
 	return id, nil
 }
 
-func (postgres *PostgreSQL)	InsertGPSData(gps models.GPSData) (int, error) {
-	query := `INSERT INTO gps_data ( gps_data_id, period_id, latitude, longitude, altitude, speed, date_gps, hour_UTC)
-			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+func (postgres *PostgreSQL)	InsertGPSData(gps models.GPSData, prototype_id string) (int, error) {
+	query := `INSERT INTO gps_data ( gps_data_id, period_id, latitude, longitude, altitude, speed, date_gps, hour_UTC, prototype_id)
+			  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 			  RETURNING gps_data_id`
 
 	var id int
@@ -133,6 +134,7 @@ func (postgres *PostgreSQL)	InsertGPSData(gps models.GPSData) (int, error) {
 		gps.Speed,
 		gps.Date_gps,
 		startT,
+		prototype_id,
 	).Scan(&id)	
 
 	if err != nil {

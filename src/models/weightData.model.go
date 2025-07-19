@@ -5,4 +5,5 @@ type WeightData struct {
 	Period_id      int     `json:"period_id"`
 	Hour_period    string  `json:"hour_period"`
 	Weight         float32 `json:"weight"`
+	Prototype_id   string  `json:"prototype_id"`
 }

@@ -14,12 +14,13 @@ type RabbitMQ struct {
 }
 
 func NewRabbitMQ() *RabbitMQ {
-	fmt.Println(os.Getenv("URL_RABBIT"))
   conn, err := amqp.Dial(os.Getenv("URL_RABBIT"))
   
   failOnError(err, "Failed to connect to RabbitMQ")
   ch, err := conn.Channel()
   failOnError(err, "Failed to open a channel")
+
+  fmt.Print("Conectando y escuchando...")
   return &RabbitMQ{conn: conn,ch: ch}
 }
 
