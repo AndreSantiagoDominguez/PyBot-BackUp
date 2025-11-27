@@ -77,7 +77,7 @@ func (r *RabbitMQ) GetMessages() <-chan amqp.Delivery {
 	err = r.ch.QueueBind(
 		q.Name, // queue name
 		"quainsbackup",     // routing key
-		"amq.topic", // exchange
+		"Inserciones", // exchange
 		false,
 		nil,
 	)
