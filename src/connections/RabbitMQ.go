@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -14,14 +15,37 @@ type RabbitMQ struct {
 }
 
 func NewRabbitMQ() *RabbitMQ {
-  conn, err := amqp.Dial(os.Getenv("URL_RABBIT"))
-  
-  failOnError(err, "Failed to connect to RabbitMQ")
-  ch, err := conn.Channel()
-  failOnError(err, "Failed to open a channel")
+    var conn *amqp.Connection
+    var err error
+    
+    url := os.Getenv("URL_RABBIT")
 
-  fmt.Print("Conectando y escuchando...")
-  return &RabbitMQ{conn: conn,ch: ch}
+    // --- LÓGICA DE REINTENTOS ---
+    maxRetries := 10 // Intentaremos 10 veces
+    retryDelay := 2 * time.Second // Espera de 2 segundos
+
+    for i := 0; i < maxRetries; i++ {
+        conn, err = amqp.Dial(url)
+        if err == nil {
+            // Si conecta, salimos del bucle inmediatamente
+            log.Println("RabbitMQ: Conexión establecida.")
+            break
+        }
+
+        // Si falla, avisamos y esperamos
+        log.Printf("RabbitMQ: Fallo al conectar (Intento %d/%d): %v. Reintentando...", i+1, maxRetries, err)
+        time.Sleep(retryDelay)
+    }
+    // ---------------------------
+
+    // Si después de todos los intentos sigue habiendo error, entonces sí fallamos fatalmente
+    failOnError(err, "Failed to connect to RabbitMQ after multiple retries")
+
+    ch, err := conn.Channel()
+    failOnError(err, "Failed to open a channel")
+
+    fmt.Print("Conectando y escuchando...")
+    return &RabbitMQ{conn: conn, ch: ch}
 }
 
 func (r *RabbitMQ) GetMessages() <-chan amqp.Delivery {
